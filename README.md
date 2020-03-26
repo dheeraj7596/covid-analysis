@@ -8,10 +8,12 @@ In this project, we aim to analyze the research documents related to Coronavirus
 
 We obtained the words from abstracts and its corresponding frequencies. 
 After removing the stopwords, we created a wordcloud shown below:
+
 ![matrix addition](figures/words.png)
   
 We obtained the phrases from abstracts using [autophrase](https://github.com/shangjingbo1226/AutoPhrase) and its corresponding frequencies. 
 After removing the stopwords, we created a wordcloud shown below:
+
 ![matrix addition](figures/phrases_all.png)
 
 We can observe that there are many unigrams in the above wordcloud. Hence, we removed unigrams
