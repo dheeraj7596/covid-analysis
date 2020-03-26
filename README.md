@@ -24,7 +24,7 @@ from the phrases and created the wordcloud shown below:
 
 ### Data
 The data is too large to upload in github. Hence, made public [here](https://drive.google.com/open?id=1bnoWMVw1DlC2Y6o14U7c8WEj8-MBU2ov). 
-- `df_29k.pkl` - This is a pickle dump of all 29k research articles
+- `df_29k.pkl` - This is a pickle dump of all 29k research articles.
 - `df_29k_auth.pkl` - This is a pickle dump of research articles which has authors information,
 title, abstract and body text. This contains 20k articles.
 
@@ -40,9 +40,9 @@ Parses autophrase output and creates wordcloud using these phrases and its corre
 Tester file to play around with wordcloud.
 
 - `write_to_file.py`:
-Writes text into a file to use it as input for autophrase
+Writes text into a file to use it as input for autophrase.
 
 - `test.py`:
-Scratch paper for testing anything
+Scratch paper for testing anything.
 
 
