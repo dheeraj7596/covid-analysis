@@ -3,13 +3,17 @@ from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    base_path = "./data/"
-    df = pickle.load(open(base_path + "df_29k.pkl", "rb"))
-    abstracts = list(df.abstract)
-    total_abstract = " ".join(abstracts)
+    data_path = "./data/"
+    phrase_freq_map = pickle.load(open(data_path + "phrase_freq_map.pkl", "rb"))
+
+    multi_word_phrase_freq_map = {}
+    for p in phrase_freq_map:
+        if len(p.strip().split()) > 1:
+            multi_word_phrase_freq_map[p] = phrase_freq_map[p]
 
     stopwords = set(STOPWORDS)
-    wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate(total_abstract)
+    wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate_from_frequencies(
+        multi_word_phrase_freq_map)
 
     # Display the generated image:
     plt.imshow(wordcloud, interpolation='bilinear')

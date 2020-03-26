@@ -45,16 +45,16 @@ if __name__ == "__main__":
                 data = json.load(json_file)
                 try:
                     title = data["metadata"]["title"]
-                    assert len(title) > 0
+                    # assert len(title) > 0
 
                     authors = get_authors(data["metadata"]["authors"])
-                    assert len(authors) > 0
+                    # assert len(authors) > 0
 
                     body = get_text(data["body_text"])
                     assert len(body) > 0
 
                     abstract = get_text(data["abstract"])
-                    assert len(abstract) > 0
+                    # assert len(abstract) > 0
 
                     final_dict["title"].append(title.lower())
                     final_dict["authors"].append(authors)
