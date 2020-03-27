@@ -71,7 +71,7 @@ if __name__ == "__main__":
     dump = True
 
     corpus = create_corpus(df)
-    vocabulary, vocab_to_int, int_to_vocab, tokenizer = create_vocabulary(corpus, num_words=135105)
+    vocabulary, vocab_to_int, int_to_vocab, tokenizer = create_vocabulary(corpus, num_words=113304)
 
     print("Size of vocabulary: ", len(vocabulary))
 
