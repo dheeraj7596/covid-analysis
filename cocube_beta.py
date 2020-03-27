@@ -1,5 +1,5 @@
-from cocube_utils_beta import get_distinct_labels, train_classifier, get_entity_count, plot_entity_count, get_cut_off, \
-    train_weight_classifier
+from cocube_utils_beta import get_distinct_labels_from_label_term_dict, train_classifier, get_entity_count, \
+    plot_entity_count, get_cut_off, train_weight_classifier
 from coc_data_utils import *
 from cocube_variations import *
 from pagerank import run_pagerank
@@ -41,10 +41,11 @@ if __name__ == "__main__":
         id_phrase_map[phrase_id_map[ph]] = ph
     tokenizer = pickle.load(open(pkl_dump_dir + "tokenizer.pkl", "rb"))
     word_to_index, index_to_word = create_index(tokenizer)
-    labels, label_to_index, index_to_label = get_distinct_labels(df)
 
     label_term_dict = get_label_term_json(pkl_dump_dir + "seedwords.json")
     label_term_dict = modify_phrases(label_term_dict, phrase_id_map)
+
+    labels, label_to_index, index_to_label = get_distinct_labels_from_label_term_dict(label_term_dict)
 
     docfreq = get_doc_freq(df)
     inv_docfreq = get_inv_doc_freq(df, docfreq)
@@ -60,8 +61,6 @@ if __name__ == "__main__":
     label_phrase_dict = modify(label_term_dict)
     print_label_phrase_dict(label_phrase_dict, id_phrase_map)
     label_author_dict = {}
-    label_conf_dict = {}
-    label_year_dict = {}
 
     t = 15
     pre_train = 0
@@ -85,8 +84,8 @@ if __name__ == "__main__":
         #     pred_labels, probs = train_classifier(df, labels, label_phrase_dict, label_author_dict, label_conf_dict,
         #                                           label_to_index, index_to_label, model_name, old=True, soft=False)
         else:
-            pred_labels, probs = train_classifier(df, labels, label_phrase_dict, label_author_dict, label_conf_dict,
-                                                  label_to_index, index_to_label, model_name, old=True, soft=False)
+            pred_labels, probs = train_classifier(df, labels, label_phrase_dict, label_author_dict, label_to_index,
+                                                  index_to_label, model_name, old=True, soft=False)
             # pred_labels, probs = train_weight_classifier(df, labels, label_phrase_dict, label_author_dict,
             #                                              label_conf_dict, label_to_index, index_to_label, model_name,
             #                                              AND=True)
@@ -163,7 +162,6 @@ if __name__ == "__main__":
         if should_print:
             print_label_phrase_dict(label_phrase_dict, id_phrase_map)
             print_label_entity_dict(label_author_dict)
-            print_label_entity_dict(label_conf_dict)
         print("#" * 80)
 
     if plot:

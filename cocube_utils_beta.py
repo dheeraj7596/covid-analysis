@@ -32,6 +32,17 @@ def get_distinct_labels(df):
     return labels, label_to_index, index_to_label
 
 
+def get_distinct_labels_from_label_term_dict(label_term_dict):
+    label_to_index = {}
+    index_to_label = {}
+    labels = set(label_term_dict.keys())
+
+    for i, label in enumerate(labels):
+        label_to_index[label] = i
+        index_to_label[i] = label
+    return labels, label_to_index, index_to_label
+
+
 def get_entity_count(label_entity_dict, entity_count):
     for l in label_entity_dict:
         try:
@@ -83,20 +94,17 @@ def softmax_label(count_dict, label_to_index):
     return softmax(temp)
 
 
-def get_train_data(df, labels, label_term_dict, label_author_dict, label_conf_dict, tokenizer, label_to_index,
-                   ignore_metadata=True, soft=False):
+def get_train_data(df, labels, label_term_dict, label_author_dict, tokenizer, label_to_index, ignore_metadata=True,
+                   soft=False):
     y = []
     X = []
-    y_true = []
     index_word = {}
     for w in tokenizer.word_index:
         index_word[tokenizer.word_index[w]] = w
     for index, row in df.iterrows():
         auth_str = row["authors"]
         authors_set = set(auth_str.split(","))
-        conf = row["conf"]
         line = row["abstract"]
-        label = row["label"]
         tokens = tokenizer.texts_to_sequences([line])[0]
         words = []
         for tok in tokens:
@@ -135,16 +143,6 @@ def get_train_data(df, labels, label_term_dict, label_author_dict, label_conf_di
                 count_dict[l]["AUTH_" + str(auth)] = label_author_dict[l][auth]
                 flag = 1
 
-            if len(label_conf_dict) and len(label_conf_dict[l]) > 0:
-                seed_conf = set(label_conf_dict[l].keys())
-                if conf in seed_conf:
-                    try:
-                        temp = count_dict[l]
-                    except:
-                        count_dict[l] = {}
-                    count_dict[l]["CONF_" + str(conf)] = label_conf_dict[l][conf]
-                    flag = 1
-
         if flag:
             if not soft:
                 lbl = argmax_label(count_dict)
@@ -154,11 +152,10 @@ def get_train_data(df, labels, label_term_dict, label_author_dict, label_conf_di
                 lbl = softmax_label(count_dict, label_to_index)
             y.append(lbl)
             X.append(line)
-            y_true.append(label)
-    return X, y, y_true
+    return X, y
 
 
-def get_count_dict_metadata(authors_set, conf, label_author_dict, label_conf_dict, labels):
+def get_count_dict_metadata(authors_set, conf, label_author_dict, labels):
     count_dict = {}
     flag = 0
     for l in labels:
@@ -176,15 +173,6 @@ def get_count_dict_metadata(authors_set, conf, label_author_dict, label_conf_dic
                 count_dict[l] = {}
             count_dict[l]["AUTH_" + str(auth)] = label_author_dict[l][auth]
 
-        if len(label_conf_dict) and len(label_conf_dict[l]) > 0:
-            seed_conf = set(label_conf_dict[l].keys())
-            if conf in seed_conf:
-                try:
-                    temp = count_dict[l]
-                except:
-                    count_dict[l] = {}
-                count_dict[l]["CONF_" + str(conf)] = label_conf_dict[l][conf]
-                flag = 1
     return count_dict, flag
 
 
@@ -213,8 +201,8 @@ def get_phrase_label(words, label_term_dict, labels, label_to_index, soft=False)
     return get_label_from_count_dict(count_dict, flag, label_to_index, soft=soft)
 
 
-def get_metadata_label(authors_set, label_author_dict, conf, label_conf_dict, labels, label_to_index, soft=False):
-    count_dict, flag = get_count_dict_metadata(authors_set, conf, label_author_dict, label_conf_dict, labels)
+def get_metadata_label(authors_set, label_author_dict, conf, labels, label_to_index, soft=False):
+    count_dict, flag = get_count_dict_metadata(authors_set, conf, label_author_dict, labels)
     return get_label_from_count_dict(count_dict, flag, label_to_index, soft)
 
 
@@ -264,15 +252,11 @@ def calculate_weight(l_phrase, l_metadata, label_index, AND=True):
         return prob_phrase + prob_metadata - prob_phrase * prob_metadata
 
 
-def get_confident_train_data(df, labels, label_term_dict, label_author_dict, label_conf_dict, label_to_index,
-                             tokenizer):
+def get_confident_train_data(df, labels, label_term_dict, label_author_dict, label_to_index, tokenizer):
     y = []
     y_phrase = []
     y_metadata = []
     X = []
-    y_true = []
-    y_true_phrase = []
-    y_true_metadata = []
     index_word = {}
     for w in tokenizer.word_index:
         index_word[tokenizer.word_index[w]] = w
@@ -288,38 +272,22 @@ def get_confident_train_data(df, labels, label_term_dict, label_author_dict, lab
             words.append(index_word[tok])
 
         l_phrase = get_phrase_label(words, label_term_dict, labels, label_to_index)
-        l_metadata = get_metadata_label(authors_set, label_author_dict, conf, label_conf_dict, labels, label_to_index)
+        l_metadata = get_metadata_label(authors_set, label_author_dict, conf, labels, label_to_index)
 
         if l_phrase == l_metadata:
             y.append(l_phrase)
             X.append(line)
-            y_true.append(label)
         elif l_phrase is None:
             y.append(l_metadata)
             X.append(line)
-            y_true.append(label)
         elif l_metadata is None:
             y.append(l_phrase)
             X.append(line)
-            y_true.append(label)
 
-        if l_phrase is not None:
-            y_phrase.append(l_phrase)
-            y_true_phrase.append(label)
-        if l_metadata is not None:
-            y_metadata.append(l_metadata)
-            y_true_metadata.append(label)
-
-    print("****************** CLASSIFICATION REPORT FOR PHRASE LABELS ********************")
-    print(classification_report(y_true_phrase, y_phrase))
-
-    print("****************** CLASSIFICATION REPORT FOR METADATA LABELS ********************")
-    print(classification_report(y_true_metadata, y_metadata))
-    return X, y, y_true
+    return X, y
 
 
-def get_weighted_train_data(df, labels, label_term_dict, label_author_dict, label_conf_dict, tokenizer, label_to_index,
-                            AND=True):
+def get_weighted_train_data(df, labels, label_term_dict, label_author_dict, tokenizer, label_to_index, AND=True):
     y = []
     X = []
     y_true = []
@@ -341,8 +309,7 @@ def get_weighted_train_data(df, labels, label_term_dict, label_author_dict, labe
         count_dict_phrase, flag_phrase = get_count_dict_phrase(label_term_dict, labels, words)
         l_phrase = get_label_from_count_dict(count_dict_phrase, flag_phrase, label_to_index, soft=True)
 
-        count_dict_metadata, flag_metadata = get_count_dict_metadata(authors_set, conf, label_author_dict,
-                                                                     label_conf_dict, labels)
+        count_dict_metadata, flag_metadata = get_count_dict_metadata(authors_set, conf, label_author_dict, labels)
         l_metadata = get_label_from_count_dict(count_dict_metadata, flag_metadata, label_to_index, soft=True)
 
         count_dict, flag = merge(count_dict_phrase, count_dict_metadata, labels)
@@ -358,8 +325,8 @@ def get_weighted_train_data(df, labels, label_term_dict, label_author_dict, labe
     return X, y, y_true, weights
 
 
-def train_weight_classifier(df, labels, label_term_dict, label_author_dict, label_conf_dict, label_to_index,
-                            index_to_label, model_name, AND=True):
+def train_weight_classifier(df, labels, label_term_dict, label_author_dict, label_to_index, index_to_label, model_name,
+                            AND=True):
     basepath = "/data4/dheeraj/metaguide/"
     dataset = "dblp/"
     # glove_dir = basepath + "glove.6B"
@@ -373,8 +340,8 @@ def train_weight_classifier(df, labels, label_term_dict, label_author_dict, labe
     embedding_dim = 100
     tokenizer = pickle.load(open(basepath + dataset + "tokenizer.pkl", "rb"))
 
-    X, y, y_true, weights = get_weighted_train_data(df, labels, label_term_dict, label_author_dict, label_conf_dict,
-                                                    tokenizer, label_to_index, AND=AND)
+    X, y, y_true, weights = get_weighted_train_data(df, labels, label_term_dict, label_author_dict, tokenizer,
+                                                    label_to_index, AND=AND)
     print("****************** CLASSIFICATION REPORT FOR TRAINING DATA ********************")
     # df_train = create_training_df(X, y, y_true)
     # df_train.to_csv(basepath + dataset + "training_label.csv")
@@ -428,7 +395,7 @@ def train_weight_classifier(df, labels, label_term_dict, label_author_dict, labe
     return pred_labels, pred
 
 
-def train_classifier(df, labels, label_term_dict, label_author_dict, label_conf_dict, label_to_index, index_to_label,
+def train_classifier(df, labels, label_term_dict, label_author_dict, label_to_index, index_to_label,
                      model_name, old=True, soft=False):
     basepath = "/data4/dheeraj/covid-analysis/"
     dataset = ""
@@ -444,24 +411,21 @@ def train_classifier(df, labels, label_term_dict, label_author_dict, label_conf_
     tokenizer = pickle.load(open(basepath + dataset + "tokenizer.pkl", "rb"))
 
     if old:
-        X, y, y_true = get_train_data(df, labels, label_term_dict, label_author_dict, label_conf_dict, tokenizer,
-                                      label_to_index, ignore_metadata=False, soft=soft)
+        X, y = get_train_data(df, labels, label_term_dict, label_author_dict, tokenizer, label_to_index,
+                              ignore_metadata=False, soft=soft)
     else:
-        X, y, y_true = get_confident_train_data(df, labels, label_term_dict, label_author_dict, label_conf_dict,
-                                                label_to_index, tokenizer)
+        X, y = get_confident_train_data(df, labels, label_term_dict, label_author_dict, label_to_index, tokenizer)
     print("****************** CLASSIFICATION REPORT FOR TRAINING DATA ********************")
     # df_train = create_training_df(X, y, y_true)
     # df_train.to_csv(basepath + dataset + "training_label.csv")
     if not soft:
         y_vec = make_one_hot(y, label_to_index)
-        print(classification_report(y_true, y))
     else:
         y_vec = np.array(y)
         y_argmax = np.argmax(y, axis=-1)
         y_str = []
         for i in y_argmax:
             y_str.append(index_to_label[i])
-        print(classification_report(y_true, y_str))
     # y = np.array(y)
     # print("Fitting tokenizer...")
     # tokenizer = fit_get_tokenizer(X, max_words)
@@ -491,19 +455,10 @@ def train_classifier(df, labels, label_term_dict, label_author_dict, label_conf_
     mc = ModelCheckpoint(filepath=tmp_dir + 'model.{epoch:02d}-{val_loss:.2f}.hdf5', monitor='val_acc', mode='max',
                          verbose=1, save_weights_only=True, save_best_only=True)
     model.fit(X_train, y_train, validation_data=(X_val, y_val), nb_epoch=100, batch_size=256, callbacks=[es, mc])
-    # print("****************** CLASSIFICATION REPORT FOR DOCUMENTS WITH LABEL WORDS ********************")
-    # X_label_all = prep_data(texts=X, max_sentences=max_sentences, max_sentence_length=max_sentence_length,
-    #                         tokenizer=tokenizer)
-    # pred = model.predict(X_label_all)
-    # pred_labels = get_from_one_hot(pred, index_to_label)
-    # print(classification_report(y_true, pred_labels))
-    print("****************** CLASSIFICATION REPORT FOR All DOCUMENTS ********************")
     X_all = prep_data(texts=df["abstract"], max_sentences=max_sentences, max_sentence_length=max_sentence_length,
                       tokenizer=tokenizer)
-    y_true_all = df["label"]
     pred = model.predict(X_all)
     pred_labels = get_from_one_hot(pred, index_to_label)
-    print(classification_report(y_true_all, pred_labels))
     print("Dumping the model...")
     model.save_weights(dump_dir + "model_weights_" + model_name + ".h5")
     model.save(dump_dir + "model_" + model_name + ".h5")
