@@ -102,8 +102,7 @@ def get_train_data(df, labels, label_term_dict, label_author_dict, tokenizer, la
     for w in tokenizer.word_index:
         index_word[tokenizer.word_index[w]] = w
     for index, row in df.iterrows():
-        auth_str = row["authors"]
-        authors_set = set(auth_str.split(","))
+        authors_set = set(row["authors"])
         line = row["abstract"]
         tokens = tokenizer.texts_to_sequences([line])[0]
         words = []
