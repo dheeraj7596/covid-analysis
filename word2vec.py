@@ -5,7 +5,7 @@ import random
 import tensorflow as tf
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "4"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 
 def get_json(path):
@@ -17,7 +17,7 @@ def get_json(path):
 def create_corpus(df):
     corpus = []
     for i, row in df.iterrows():
-        corpus.append(row["Review"])
+        corpus.append(row["abstract"])
     return corpus
 
 
