@@ -33,8 +33,11 @@ title, abstract and body text. This contains 20k articles.
 - `create_df.py`:
 Creates pandas DataFrame from jsons and dumps it.
 
-- `parse_autophrase_output.py`:
+- `create_phrase_frequency_map.py`:
 Parses autophrase output and creates wordcloud using these phrases and its corresponding frequencies.
+
+- `parse_autophrase_output.py`:
+Parses autophrase output and replaces phrases by pseudowords-"fnust[phrase_id]". 
 
 - `word_cloud.py`:
 Tester file to play around with wordcloud.
@@ -44,5 +47,21 @@ Writes text into a file to use it as input for autophrase.
 
 - `test.py`:
 Scratch paper for testing anything.
+
+- `topic_modelling.py`:
+Does topic modeling using LDA.
+
+- `word2vec.py`, `word2vec_utils.py`:
+Builds word-vectors from abstracts of all research papers.
+
+- `update_utils.py`, `pagerank.py`, `data_utils.py`, `construct_graph.py`,
+`cocube_variations.py`, `cocube_utils_beta.py`, `cocube_beta.py`, 
+`coc_data_utils.py`: 
+Performs weakly supervised classification to classify research articles into
+`SARS`, `MERS`, `COVID-19` based on their disease of focus.
+ 
+
+
+
 
 
