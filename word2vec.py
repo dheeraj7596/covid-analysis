@@ -35,7 +35,7 @@ def get_idx_pairs(df, tokenizer):
     x = []
     y = []
     for i, row in df.iterrows():
-        tokenized_abstract_words = tokenizer.texts_to_sequences([row["Review"]])[0]
+        tokenized_abstract_words = tokenizer.texts_to_sequences([row["abstract"]])[0]
         for i, word in enumerate(tokenized_abstract_words):
             x.append(word)
             target_words = get_target(tokenized_abstract_words, i)
