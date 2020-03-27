@@ -68,7 +68,10 @@ def print_label_phrase_dict(label_phrase_dict, id_phrase_map):
         print("*" * 80)
         for key in label_phrase_dict[label]:
             id = decrypt(key)
-            print(id_phrase_map[id], label_phrase_dict[label][key])
+            if id is not None:
+                print(id_phrase_map[id], label_phrase_dict[label][key])
+            else:
+                print(key, label_phrase_dict[label][key])
 
 
 def print_label_entity_dict(label_entity_dict):
