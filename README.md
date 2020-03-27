@@ -59,6 +59,9 @@ Builds word-vectors from abstracts of all research papers.
 `coc_data_utils.py`: 
 Performs weakly supervised classification to classify research articles into
 `SARS`, `MERS`, `COVID-19` based on their disease of focus.
+
+- `create_docid_maps.py`:
+Creates Phrase-DocId, Author-DocId map.
  
 - `keras_han`: Hierarchical Attention Networks code.
 
