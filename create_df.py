@@ -54,7 +54,7 @@ if __name__ == "__main__":
                     assert len(body) > 0
 
                     abstract = get_text(data["abstract"])
-                    # assert len(abstract) > 0
+                    assert len(abstract) > 0
 
                     final_dict["title"].append(title.lower())
                     final_dict["authors"].append(authors)
@@ -67,4 +67,4 @@ if __name__ == "__main__":
 
     print(except_counter)
     final_df = pd.DataFrame.from_dict(final_dict)
-    pickle.dump(final_df, open(base_path + "df_29k.pkl", "wb"))
+    pickle.dump(final_df, open(base_path + "df_29k_abstract.pkl", "wb"))

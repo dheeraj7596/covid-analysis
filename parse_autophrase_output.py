@@ -1,8 +1,6 @@
 from bs4 import BeautifulSoup
 import bleach
 import pickle
-from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
-import matplotlib.pyplot as plt
 
 
 def generate_name(id):
@@ -21,12 +19,12 @@ if __name__ == "__main__":
     base_path = "./data/"
     data_path = base_path
     out_path = data_path + "segmentation.txt"
-    df = pickle.load(open(data_path + "df_29k.pkl", "rb"))
+    df = pickle.load(open(data_path + "df_29k_abstract.pkl", "rb"))
     f = open(out_path, "r")
     lines = f.readlines()
     f.close()
 
-    phrase_freq_map = {}
+    phrase_id_map = {}
     counter = 0
     data = []
 
@@ -36,18 +34,21 @@ if __name__ == "__main__":
         for p in soup.findAll("phrase"):
             phrase = p.string
             try:
-                phrase_freq_map[phrase] += 1
+                temp = phrase_id_map[phrase]
             except:
-                phrase_freq_map[phrase] = 1
+                phrase_id_map[phrase] = counter
+                counter += 1
+            name = generate_name(phrase_id_map[phrase])
+            p.string.replace_with(" " + name + " ")
+        temp_str = bleach.clean(str(soup), tags=[], strip=True)
+        data.append(temp_str)
 
-    phrase_freq_map = {k: v for k, v in sorted(phrase_freq_map.items(), key=lambda item: -item[1])}
-    pickle.dump(phrase_freq_map, open(base_path + "phrase_freq_map.pkl", "wb"))
+    df["abstract"] = data
+    pickle.dump(df, open(data_path + "df_29k_abstract_phrase.pkl", "wb"))
 
-    stopwords = set(STOPWORDS)
-    wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate_from_frequencies(phrase_freq_map)
+    id_phrase_map = {}
+    for ph in phrase_id_map:
+        id_phrase_map[phrase_id_map[ph]] = ph
 
-    # Display the generated image:
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis("off")
-    plt.show()
-    pass
+    pickle.dump(phrase_id_map, open(data_path + "phrase_id_map.pkl", "wb"))
+    pickle.dump(id_phrase_map, open(data_path + "id_phrase_map.pkl", "wb"))
