@@ -9,7 +9,7 @@ from data_utils import *
 import pickle
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "6"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 def create_training_df(X, y, y_true):

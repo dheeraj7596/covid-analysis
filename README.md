@@ -60,7 +60,7 @@ Builds word-vectors from abstracts of all research papers.
 Performs weakly supervised classification to classify research articles into
 `SARS`, `MERS`, `COVID-19` based on their disease of focus.
  
-
+- `keras_han`: Hierarchical Attention Networks code.
 
 
 
