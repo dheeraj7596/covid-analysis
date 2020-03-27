@@ -63,8 +63,10 @@ def get_batches(x, y, batch_size):
 
 
 if __name__ == "__main__":
-    base_path = "./data/"
-    data_path = base_path
+    base_path = "/data4/dheeraj/covid-analysis/"
+    dataset = ""
+
+    data_path = base_path + dataset
     df = pickle.load(open(data_path + "df_29k_abstract_phrase_removed_stopwords.pkl", "rb"))
     dump = True
 
